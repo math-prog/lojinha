@@ -15,8 +15,8 @@ services:
       - app-network
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 20s
+      timeout: 10s
       retries: 5
 
   bot:
@@ -25,8 +25,9 @@ services:
       - ./:/app
     depends_on:
       - db
+    entrypoint: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
     env_file:
-      - .env  # Caminho corrigido
+      - .env
     networks:
       - app-network
 
