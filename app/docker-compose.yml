@@ -25,7 +25,7 @@ services:
       - ./:/app
     depends_on:
       - db
-    entrypoint: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
+    entrypoint: ["sh", "-c", "until pg_isready -h db -U postgres; do echo Waiting for database connection...; sleep 5; done && python app.py"]
     env_file:
       - .env
     networks:
