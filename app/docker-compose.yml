@@ -26,7 +26,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./app/.env
+      - .env  # Caminho corrigido
     networks:
       - app-network
 
