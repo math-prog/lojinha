@@ -19,24 +19,21 @@ services:
       timeout: 5s
       retries: 5
 
-  networks:
-  app-network:
-    driver: bridge
-
-
   bot:
     build: .
     volumes:
       - ./:/app
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/telegram_bot
       - TELEGRAM_TOKEN=7959004347:AAFzxQMmXgCPCoO_oILg0e5bu8Mmij53hUM
     networks:
       - app-network
 
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:
