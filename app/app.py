@@ -5,66 +5,70 @@ from sqlalchemy.orm import sessionmaker
 from database import init_db, criar_cliente, criar_produto, registrar_venda
 import os
 from dotenv import load_dotenv
+import logging
 
+# Configuração de logs
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# Carrega as variáveis de ambiente
 load_dotenv()
 
-# Inicializa o banco de dados
-engine = init_db()
-Session = sessionmaker(bind=engine)
+# Verifica se as variáveis de ambiente estão presentes
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+DB_URL = os.getenv("DATABASE_URL")
 
-API_TOKEN = os.getenv("TELEGRAM_TOKEN")
+logger.info(f"Token encontrado: {'Sim' if TOKEN else 'Não'}")
+logger.info(f"Database URL encontrada: {'Sim' if DB_URL else 'Não'}")
+
+if not TOKEN:
+    raise ValueError("TELEGRAM_TOKEN não encontrado no arquivo .env")
+
+if not DB_URL:
+    raise ValueError("DATABASE_URL não encontrado no arquivo .env")
+
+# Inicializa o banco de dados
+try:
+    engine = init_db()
+    Session = sessionmaker(bind=engine)
+    logger.info("Conexão com o banco de dados estabelecida com sucesso")
+except Exception as e:
+    logger.error(f"Erro ao conectar com o banco de dados: {str(e)}")
+    raise
 
 async def start_function(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Olá! Bem-vindo ao bot de vendas.\n"
-                                  "Comandos disponíveis:\n"
-                                  "/cadastrar_cliente - Cadastra um novo cliente\n"
-                                  "/cadastrar_produto - Cadastra um novo produto\n"
-                                  "/registrar_venda - Registra uma nova venda")
-
-async def cadastrar_cliente(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    session = Session()
     try:
-        # Exemplo simples - em produção você deve implementar um fluxo de conversação
-        args = context.args
-        if len(args) < 3:
-            await update.message.reply_text("Use: /cadastrar_cliente nome endereco contato")
-            return
-            
-        nome = args[0]
-        endereco = args[1]
-        contato = args[2]
+        logger.info(f"Comando /start recebido do usuário {update.effective_user.id}")
+        await update.message.reply_text("Olá! Bem-vindo ao bot de vendas.\n"
+                                      "Comandos disponíveis:\n"
+                                      "/cadastrar_cliente - Cadastra um novo cliente\n"
+                                      "/cadastrar_produto - Cadastra um novo produto\n"
+                                      "/registrar_venda - Registra uma nova venda")
+    except Exception as e:
+        logger.error(f"Erro no comando start: {str(e)}")
+        await update.message.reply_text("Desculpe, ocorreu um erro ao processar seu comando.")
+
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error(f"Update {update} causou o erro {context.error}")
+
+def main():
+    try:
+        logger.info("Iniciando o bot...")
+        app = ApplicationBuilder().token(TOKEN).build()
         
-        cliente = criar_cliente(session, nome, endereco, contato)
-        await update.message.reply_text(f"Cliente cadastrado com ID: {cliente.id}")
-    
-    finally:
-        session.close()
-
-async def cadastrar_produto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    session = Session()
-    try:
-        args = context.args
-        if len(args) < 5:
-            await update.message.reply_text("Use: /cadastrar_produto nome quantidade imagem valor unidade")
-            return
-            
-        produto = criar_produto(
-            session,
-            nome=args[0],
-            qtd=int(args[1]),
-            imagem=args[2],
-            valor=float(args[3]),
-            unidade=args[4]
-        )
-        await update.message.reply_text(f"Produto cadastrado com ID: {produto.id}")
-    
-    finally:
-        session.close()
-
-app = ApplicationBuilder().token(API_TOKEN).build()
-app.add_handler(CommandHandler("start", start_function))
-app.add_handler(CommandHandler("cadastrar_cliente", cadastrar_cliente))
-app.add_handler(CommandHandler("cadastrar_produto", cadastrar_produto))
+        # Handlers
+        app.add_handler(CommandHandler("start", start_function))
+        app.add_error_handler(error_handler)
+        
+        logger.info("Bot iniciado com sucesso! Aguardando comandos...")
+        app.run_polling()
+        
+    except Exception as e:
+        logger.error(f"Erro fatal ao iniciar o bot: {str(e)}")
+        raise
 
 if __name__ == '__main__':
-    app.run_polling()
+    main()
