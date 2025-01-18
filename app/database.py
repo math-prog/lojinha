@@ -55,9 +55,13 @@ class Venda(Base):
 
 # Função para inicializar o banco de dados
 def init_db():
-    engine = create_engine(os.getenv('DATABASE_URL'))
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url or database_url.strip() == 'DATABASE_URL':
+        raise ValueError("Invalid or unset DATABASE_URL environment variable.")
+    engine = create_engine(database_url)
     Base.metadata.create_all(engine)
     return engine
+
 
 # Funções de CRUD para Cliente
 def criar_cliente(session, nome, endereco, contato):
