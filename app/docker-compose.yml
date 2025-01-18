@@ -26,8 +26,8 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/telegram_bot
-      - TELEGRAM_TOKEN=7959004347:AAFzxQMmXgCPCoO_oILg0e5bu8Mmij53hUM
+      - DATABASE_URL= DATABASE_URL
+      - TELEGRAM_TOKEN=TELEGRAM_TOKEN
     networks:
       - app-network
 
