@@ -13,6 +13,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   networks:
   app-network:
@@ -24,7 +29,8 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/telegram_bot
       - TELEGRAM_TOKEN=7959004347:AAFzxQMmXgCPCoO_oILg0e5bu8Mmij53hUM
