@@ -25,9 +25,8 @@ services:
       - ./:/app
     depends_on:
       - db
-    environment:
-      - DATABASE_URL= DATABASE_URL
-      - TELEGRAM_TOKEN=TELEGRAM_TOKEN
+    env_file:
+      - ./app/.env
     networks:
       - app-network
 
