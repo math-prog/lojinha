@@ -36,7 +36,7 @@ class MovimentacaoEstoque(Base):
     produto_id = Column(Integer, ForeignKey('catalogo.id'))
     tipo = Column(String)  # 'entrada' ou 'saida'
     quantidade = Column(Integer)
-    data = Column(DateTime, default=datetime.utcnow)
+    data = Column(DateTime, default=datetime.now())
     
     produto = relationship("Catalogo", back_populates="movimentacoes")
 
@@ -48,7 +48,7 @@ class Venda(Base):
     produto_id = Column(Integer, ForeignKey('catalogo.id'))
     qtd = Column(Integer)
     metodo_pagamento = Column(String)
-    data = Column(DateTime, default=datetime.utcnow)
+    data = Column(DateTime, default=datetime.now())
     
     cliente = relationship("Cliente", back_populates="vendas")
     produto = relationship("Catalogo", back_populates="vendas")
