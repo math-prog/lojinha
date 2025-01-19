@@ -54,6 +54,17 @@ async def start_function(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f"Update {update} causou o erro {context.error}")
 
+async def register_product(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Selecionar os produtos com saldo
+
+    # Informar da escolha, a quantidade disponível para a compra
+    
+    await update.message.reply_text("Vc escolheu cadstrar um novo produto.")
+
+async def register_sell(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    await update.message.reply_text("Vc escolheu cadastrar uma nova venda.")
+
 def main():
     try:
         logger.info("Iniciando o bot...")
@@ -61,6 +72,8 @@ def main():
         
         # Handlers
         app.add_handler(CommandHandler("start", start_function))
+        app.add_handler(CommandHandler("cadastrar_produto", register_product))
+        app.add_handler(CommandHandler("registrar_venda", register_sell))
         app.add_error_handler(error_handler)
         
         logger.info("Bot iniciado com sucesso! Aguardando comandos...")
